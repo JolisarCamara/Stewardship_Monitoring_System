@@ -1,0 +1,53 @@
+-- Create roles table first (since users will reference it)
+CREATE TABLE roles (
+  id SERIAL PRIMARY KEY,
+  name VARCHAR(50) UNIQUE NOT NULL,
+  description TEXT,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Insert roles
+INSERT INTO roles (id, name, description) VALUES 
+  (1, 'user', 'Regular user - can manage own data only'),
+  (2, 'admin', 'Administrator - can manage user accounts and data'),
+  (3, 'super-admin', 'Super Administrator - can manage everything including admins');
+
+-- Create users table with all fields
+CREATE TABLE users (
+  id SERIAL PRIMARY KEY,
+  name VARCHAR(255) NOT NULL,
+  email VARCHAR(255) UNIQUE NOT NULL,
+  password VARCHAR(255) NOT NULL,
+  role_id INTEGER REFERENCES roles(id) DEFAULT 1,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Create indexes for better performance
+CREATE INDEX idx_users_email ON users(email);
+CREATE INDEX idx_users_role_id ON users(role_id);
+
+-- Create function to update updated_at timestamp
+CREATE OR REPLACE FUNCTION update_updated_at_column()
+RETURNS TRIGGER AS $$
+BEGIN
+    NEW.updated_at = CURRENT_TIMESTAMP;
+    RETURN NEW;
+END;
+$$ language 'plpgsql';
+
+-- Create trigger to automatically update updated_at
+CREATE TRIGGER update_users_updated_at 
+  BEFORE UPDATE ON users 
+  FOR EACH ROW 
+  EXECUTE FUNCTION update_updated_at_column();
+
+-- Insert a default super-admin user (optional - for initial setup)
+-- Password: 'admin123' (CHANGE THIS IMMEDIATELY!)
+INSERT INTO users (name, email, password, role_id) 
+VALUES (
+  'Super Admin', 
+  'superadmin@example.com', 
+  '$2a$10$rZ5YhXQVEKKKKHW8Kq0eYeVjBxJXqZ8QYZQYqKQQKQKQKQKQKQKQK', 
+  3
+);

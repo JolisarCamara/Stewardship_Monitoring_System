@@ -1,0 +1,9 @@
+@import "tailwindcss";
+
+.bg-navy-dark {
+  background-color: #0A1E3F;
+}
+
+.text-navy-dark {
+  color: #0A1E3F;
+}
