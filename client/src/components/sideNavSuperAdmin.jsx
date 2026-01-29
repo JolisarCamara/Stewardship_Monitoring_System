@@ -11,14 +11,14 @@ const SideBar_superAdmin = ({ children }) => {
 
   return (
     <div className="flex min-h-screen bg-[#e6e6e6]">
-      <aside className="w-[260px] h-screen bg-navy-dark fixed left-0 top-0 flex flex-col font-inter">
+      <aside className="w-[200px] h-screen bg-navy-dark fixed left-0 top-0 flex flex-col font-inter">
         <div className="p-6">
-          <div className="w-full h-[178px] flex items-center justify-center">
+          <div className="w-full h-[100px] flex items-center justify-center">
             <img src="/logo.png" alt="Logo" />
           </div>
         </div>
 
-        <nav className="flex flex-col gap-2 px-6">
+        <nav className="flex flex-col px-3">
           {navItems.map((item) => (
             <NavLink
               key={item.path}
