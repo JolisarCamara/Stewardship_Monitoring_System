@@ -1,14 +1,10 @@
 import React from "react";
 import LogoutButton from "../../components/LogoutButton";
 
-const ActivityLogsPage = ({ user, setUser}) =>{
+const ActivityLogsPage = () =>{
     return (
-    <div>
-      <header>
-        <h1>Welcome, {user.name}</h1>
-      </header>
-     <div>Admin Dashboard</div>
-     <LogoutButton setUser={setUser} />
+     <div>
+     <div>Activity Logs</div>
     </div>
     );
 }

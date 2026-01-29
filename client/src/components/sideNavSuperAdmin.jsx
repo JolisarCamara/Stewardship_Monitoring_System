@@ -10,6 +10,7 @@ const SideBar_superAdmin = ({ children }) => {
     { label: "ACTIVITY LOGS", path: "/superadmin-dashboard/activity-logs" },
   ];
 
+  
   return (
     <div className="flex min-h-screen bg-[#e6e6e6]">
       <aside className="w-[200px] h-screen bg-navy-dark fixed left-0 top-0 flex flex-col font-inter">
@@ -36,7 +37,7 @@ const SideBar_superAdmin = ({ children }) => {
         </nav>
       </aside>
 
-      <main className="ml-[260px] flex-1 p-10">
+      <main className="ml-[200px] flex-1 p-10">
         {children}
       </main>
 

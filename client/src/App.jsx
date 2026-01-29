@@ -4,11 +4,12 @@ import { BrowserRouter as Router, Routes, Route, Navigate, Outlet } from "react-
 
 import ScholarDashboard from "./pages/Scholar/scholarDashboard";
 import AdminDashboard from "./pages/Admin/adminDashboard";
-import SuperAdminDashboard from "./pages/superAdmin/superAdminDashboard";
+import SARoutes from "./pages/superAdmin/SARoutes";
 import RulesPage from "./pages/superAdmin/rules";
 import AdminsPage from "./pages/superAdmin/adminPage";
 import ScholarsPage from "./pages/superAdmin/scholarPage";
 import ActivityLogsPage from "./pages/superAdmin/activityLogPage";
+import SuperAdminDashboard from "./pages/superAdmin/super-admin-dashboard";
 import Login from "./pages/Login";
 
 axios.defaults.withCredentials = true;
@@ -89,13 +90,14 @@ function App() {
   path="/superadmin-dashboard"
   element={
     user && user.role === "super-admin" ? (
-      <SuperAdminDashboard user={user} setUser={setUser} />
+      <SARoutes user={user} setUser={setUser} />
     ) : (
       <Navigate to="/" replace />
     )
   }>
 
 {/* Nested routes */}
+          <Route index element={<SuperAdminDashboard />} />
           <Route path="admins" element={<AdminsPage />} />
           <Route path="scholars" element={<ScholarsPage />} />
           <Route path="rules" element={<RulesPage />} />
