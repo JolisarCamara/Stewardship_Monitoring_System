@@ -1,6 +1,6 @@
-import { Link, useLocation } from "react-router-dom";
+import { NavLink } from "react-router-dom";
 
-export default function SideBar_superAdmin() {
+const SideBar_superAdmin = ({ children }) => {
   const navItems = [
     { label: "DASHBOARD", path: "/superadmin-dashboard" },
     { label: "ADMINS", path: "/superadmin-dashboard/admins" },
@@ -9,39 +9,37 @@ export default function SideBar_superAdmin() {
     { label: "ACTIVITY LOGS", path: "/superadmin-dashboard/activity-logs" },
   ];
 
-  const location = useLocation();
-
   return (
-    <div className="bg-[#e6e6e6] min-h-screen flex">
-      <div className="w-[260px] h-screen bg-navy-dark fixed left-0 top-0 flex flex-col font-inter">
+    <div className="flex min-h-screen bg-[#e6e6e6]">
+      <aside className="w-[260px] h-screen bg-navy-dark fixed left-0 top-0 flex flex-col font-inter">
         <div className="p-6">
           <div className="w-full h-[178px] flex items-center justify-center">
             <img src="/logo.png" alt="Logo" />
           </div>
         </div>
 
-        <nav className="flex-1 pt-8">
-          {navItems.map((item) => {
-            const isActive =
-              location.pathname === item.path ||
-              (location.pathname === "/" &&
-                item.path === "/superadmin-dashboard");
-
-            return (
-              <Link
-                key={item.path}
-                to={item.path}
-                className={`block w-full px-10 py-3 text-white text-[16px] font-bold tracking-[-0.32px] 
-                  transition-colors rounded
-                  ${isActive ? "bg-blue-600" : "hover:bg-blue-500"}
-                `}
-              >
-                {item.label}
-              </Link>
-            );
-          })}
+        <nav className="flex flex-col gap-2 px-6">
+          {navItems.map((item) => (
+            <NavLink
+              key={item.path}
+              to={item.path}
+              end={item.path === "/superadmin-dashboard"}
+              className={({ isActive }) =>
+                `h-12 flex items-center text-white font-bold tracking-wide rounded-lg px-4 transition
+                ${isActive ? "bg-[#3d4a66]" : "hover:bg-[#3d4a66]"}`
+              }
+            >
+              {item.label}
+            </NavLink>
+          ))}
         </nav>
-      </div>
+      </aside>
+
+      <main className="ml-[260px] flex-1 p-10">
+        {children}
+      </main>
     </div>
   );
-}
+};
+
+export default SideBar_superAdmin;

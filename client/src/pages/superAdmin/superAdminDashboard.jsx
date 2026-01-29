@@ -7,11 +7,13 @@ const SuperAdminDashboard = () => {
   
   return (
     <SideBar_superAdmin>
-      <div className="ml-[260px] flex-1 p-8">
+       <div className="ml-[260px] flex-1 p-8">
+        <h1 className="text-2xl md:text-3xl font-bold text-[#3D5A80] mb-6">
+          SUPER ADMIN DASHBOARD
+        </h1>
         <Outlet />
-
-        {/* Stats, cards, lists go here */}
       </div>
+        
     </SideBar_superAdmin>
   );
 }
