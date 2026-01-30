@@ -1,7 +1,7 @@
 import { NavLink } from "react-router-dom";
 import LogoutButton from "./LogoutButton";
-
-const SideBar_superAdmin = ({ children }) => {
+ 
+const SideBar_superAdmin = ({ children, setUser }) => {
   const navItems = [
     { label: "DASHBOARD", path: "/superadmin-dashboard" },
     { label: "ADMINS", path: "/superadmin-dashboard/admins" },
@@ -40,8 +40,7 @@ const SideBar_superAdmin = ({ children }) => {
       <main className="ml-[200px] flex-1 p-10">
         {children}
       </main>
-
-      <LogoutButton/>
+          <LogoutButton setUser={setUser}/>
     </div>
   );
 };
