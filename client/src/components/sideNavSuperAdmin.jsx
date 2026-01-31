@@ -4,6 +4,7 @@ import LogoutButton from "./LogoutButton";
 const SideBar_superAdmin = ({ children, setUser }) => {
   const navItems = [
     { label: "DASHBOARD", path: "/superadmin-dashboard" },
+    { label: "SUPER ADMIN", path: "/superadmin-dashboard/super-admins" },
     { label: "ADMINS", path: "/superadmin-dashboard/admins" },
     { label: "SCHOLARS", path: "/superadmin-dashboard/scholars" },
     { label: "RULES", path: "/superadmin-dashboard/rules" },

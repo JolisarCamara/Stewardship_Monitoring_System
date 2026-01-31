@@ -3,11 +3,12 @@ import InputBase from '@mui/material/InputBase';
 import IconButton from '@mui/material/IconButton';
 import SearchIcon from '@mui/icons-material/Search';
 
- const handleSearchChange = (event) => {
+export default function CustomizedInputBase({ onSearch}) {
+
+   const handleSearchChange = (event) => {
         onSearch(event.target.value); // Call the onSearch callback with the input value
     };
-
-export default function CustomizedInputBase() {
+    
   return (
     <Paper
       component="form"
@@ -19,7 +20,7 @@ export default function CustomizedInputBase() {
         inputProps={{ 'arial': 'search name' }}
         onChange={handleSearchChange}
       />
-      <IconButton type="button" sx={{ p: '10px' }} aria-label="search">
+      <IconButton>
         <SearchIcon />
       </IconButton>
     </Paper>

@@ -22,7 +22,7 @@ const generateToken = (id) => {
 };
 
 // Register - New users are always created as regular users (role_id = 1)
-router.post("/register", async (req, res) => {
+router.post("/register", protect, hasRole("admin", "super-admin"), async (req, res) => {
   const { name, email, password } = req.body;
 
   if (!name || !email || !password) {
@@ -126,7 +126,7 @@ router.post("/logout", (req, res) => {
 // Add this route after the existing routes
 
 // Create admin account - Only super-admin can do this
-router.post("/register-admin", protect,  async (req, res) => {
+router.post("/register-super-admin", async (req, res) => {
   try {
     const { name, email, password, role } = req.body;
 
@@ -137,14 +137,6 @@ router.post("/register-admin", protect,  async (req, res) => {
 
     if (password.length < 6) {
       return res.status(400).json({ message: "Password must be at least 6 characters" });
-    }
-
-    // Validate role - super-admin can create both admin and super-admin accounts
-    const validRoles = ['admin', 'super-admin'];
-    if (!role || !validRoles.includes(role)) {
-      return res.status(400).json({ 
-        message: "Invalid role. Must be 'admin' or 'super-admin'" 
-      });
     }
 
     // Check if user already exists

@@ -3,6 +3,7 @@ import Stack from '@mui/material/Stack';
 import Button from '@mui/material/Button';
 
 export default function AccountListItem({ name, email, onEdit, onDelete }) {
+
   return (
     <div className="bg-white rounded-lg p-4 flex items-center justify-between border border-gray-100 shadow-sm">
       <div>

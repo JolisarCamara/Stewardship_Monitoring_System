@@ -6,10 +6,11 @@ import ScholarDashboard from "./pages/Scholar/scholarDashboard";
 import AdminDashboard from "./pages/Admin/adminDashboard";
 import SARoutes from "./pages/superAdmin/SARoutes";
 import RulesPage from "./pages/superAdmin/rules";
-import AdminsPage from "./pages/superAdmin/adminPage";
-import ScholarsPage from "./pages/superAdmin/scholarPage";
+import AdminsAccounts from "./pages/superAdmin/adminAccounts";
+import ScholarsAccounts from "./pages/superAdmin/scholarAccounts";
 import ActivityLogsPage from "./pages/superAdmin/activityLogPage";
 import SuperAdminDashboard from "./pages/superAdmin/super-admin-dashboard";
+import SuperAdminAccounts from "./pages/superAdmin/super-adminAccounts";
 import Login from "./pages/Login";
 
 axios.defaults.withCredentials = true;
@@ -98,8 +99,9 @@ function App() {
 
 {/* Nested routes */}
           <Route index element={<SuperAdminDashboard />} />
-          <Route path="admins" element={<AdminsPage />} />
-          <Route path="scholars" element={<ScholarsPage />} />
+          <Route path="super-admins" element={<SuperAdminAccounts />} />
+          <Route path="admins" element={<AdminsAccounts />} />
+          <Route path="scholars" element={<ScholarsAccounts />} />
           <Route path="rules" element={<RulesPage />} />
           <Route path="activity-logs" element={<ActivityLogsPage />} />
         </Route>

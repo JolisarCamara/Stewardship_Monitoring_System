@@ -10,18 +10,14 @@ const router = express.Router();
 // Get all users
 // Admin: can see only regular users (role_id = 1)
 // Super-admin: can see everyone
-router.get("/", protect, hasRole("admin", "super-admin"), async (req, res) => {
+router.get("/scholar-accounts", protect, hasRole("admin", "super-admin"), async (req, res) => {
   try {
     let query = `
       SELECT u.id, u.name, u.email, u.created_at, r.name as role
       FROM users u
       LEFT JOIN roles r ON u.role_id = r.id
+      WHERE u.role_id = 1
     `;
-
-    // Admins can only see regular users
-    if (req.user.role_name === "admin") {
-      query += " WHERE u.role_id = 1";
-    }
 
     query += " ORDER BY u.created_at DESC";
 
@@ -33,8 +29,48 @@ router.get("/", protect, hasRole("admin", "super-admin"), async (req, res) => {
   }
 });
 
+router.get("/super-admin-accounts", protect, hasRole("admin", "super-admin"), async (req, res) => {
+  try {
+    let query = `
+      SELECT u.id, u.name, u.email, u.created_at, r.name as role
+      FROM users u
+      LEFT JOIN roles r ON u.role_id = r.id
+      WHERE u.role_id = 3
+    `;
+
+    query += " ORDER BY u.created_at DESC";
+
+    const users = await pool.query(query);
+    res.json(users.rows);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Server error" });
+  }
+});
+
+router.get("/admin-accounts", protect, hasRole("super-admin"), async (req, res) => {
+  try {
+    let query = `
+      SELECT u.id, u.name, u.email, u.created_at, r.name as role
+      FROM users u
+      LEFT JOIN roles r ON u.role_id = r.id
+      WHERE u.role_id = 2
+    `;
+
+    query += " ORDER BY u.created_at DESC";
+
+    const users = await pool.query(query);
+    res.json(users.rows);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Server error" });
+  }
+});
+
+
+
 // Create admin account - Only super-admin can do this
-router.post("/create-admin", protect, async (req, res) => {
+router.post("/create-admin", protect, hasRole("super-admin"), async (req, res) => {
   try {
     const { name, email, password, role } = req.body;
 
