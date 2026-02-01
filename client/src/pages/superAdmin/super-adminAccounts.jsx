@@ -4,6 +4,7 @@ import SettingsIcon from "@mui/icons-material/Settings";
 
 import SearchInput from "../../components/ui/SearchInput";
 import AccountListItem from "../../components/ui/AccountListItem";
+import CreateSuperAdminButton from "./createAccounts/createSuperAdmin";
 
 // MUI Dialog imports
 import Dialog from "@mui/material/Dialog";
@@ -93,8 +94,14 @@ const SuperAdminAccounts = () => {
         <SettingsIcon className="text-gray-400" />
       </div>
 
-      <SearchInput onSearch={setSearch} />
-
+      <div className="flex flex-col sm:flex-row gap-4 mb-6">
+        <div className="flex-1">
+      <SearchInput onSearch={setSearch} /> 
+      <CreateSuperAdminButton onCreated={fetchSuperAdmins} />
+        </div>
+      </div>
+      
+    
       <div className="space-y-3 mt-6">
         {filteredSuperAdmins.map((superAdmins) => (
           <AccountListItem

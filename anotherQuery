@@ -1,0 +1,21 @@
+-- 1️⃣ Create referenced table first
+CREATE TABLE admins_role (
+  placement_id SERIAL PRIMARY KEY,
+  coordinator_placement VARCHAR(100) NOT NULL,
+  description TEXT
+);
+
+-- 2️⃣ Then scholar profiles
+CREATE TABLE scholar_profiles (
+  user_id INT PRIMARY KEY REFERENCES users(id) ON DELETE CASCADE,
+  student_id VARCHAR(50) NOT NULL,
+  course VARCHAR(100)
+);
+
+-- 3️⃣ Then admin profiles
+CREATE TABLE admin_profiles (
+  user_id INT PRIMARY KEY REFERENCES users(id) ON DELETE CASCADE,
+  placement_id INT REFERENCES admins_role(placement_id),
+  placement VARCHAR(100)
+);
+

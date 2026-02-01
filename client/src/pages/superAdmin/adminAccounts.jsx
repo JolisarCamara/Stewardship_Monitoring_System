@@ -4,6 +4,7 @@ import SettingsIcon from "@mui/icons-material/Settings";
 
 import SearchInput from "../../components/ui/SearchInput";
 import AccountListItem from "../../components/ui/AccountListItem";
+import CreateAdminButton from "./createAccounts/createAdmin";
 
 // MUI Dialog imports
 import Dialog from "@mui/material/Dialog";
@@ -16,7 +17,7 @@ import IconButton from "@mui/material/IconButton";
 import Stack from "@mui/material/Stack";
 import CloseIcon from '@mui/icons-material/Close';
 
-const AdminPage = () => {
+const AdminAccounts = () => {
   const [admins, setAdmins] = useState([]);
   const [search, setSearch] = useState("");
 
@@ -94,6 +95,7 @@ const AdminPage = () => {
       </div>
 
       <SearchInput onSearch={setSearch} />
+      <CreateAdminButton onCreated={fetchAdmins} />
 
       <div className="space-y-3 mt-6">
         {filteredAdmins.map((admin) => (
@@ -174,4 +176,4 @@ const AdminPage = () => {
   );
 };
 
-export default AdminPage;
+export default AdminAccounts;

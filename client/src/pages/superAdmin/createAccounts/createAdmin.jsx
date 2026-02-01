@@ -12,7 +12,7 @@ import {
 } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
 
-const CreateSuperAdminButton = ({ onCreated }) => {
+const CreateAdminButton = ({ onCreated }) => {
   const [open, setOpen] = useState(false);
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
@@ -21,14 +21,14 @@ const CreateSuperAdminButton = ({ onCreated }) => {
   const handleClose = () => setOpen(false);
 
   const handleCreate = async () => {
-    await axios.post("/api/auth/register-super-admin", {
+    await axios.post("/api/users/create-admin", {
       name,
       email,
       password,
-      role: "super-admin"
+      role: "admin"
     });
 
-    onCreated(); // refresh super-admin list
+    onCreated(); 
     handleClose();
     setName("");
     setEmail("");
@@ -44,18 +44,19 @@ const CreateSuperAdminButton = ({ onCreated }) => {
           position: "absolute", 
           right: "2%", 
           top: "15.5%",
+          width: 270,
           bgcolor: "#C9A227",
           "&:hover": { bgcolor: "#B8960F"
           },
         }}
         onClick={() => setOpen(true)}
       >
-        + Create Super Admin Account
+        + Create Admin Account
       </Button>
 
       <Dialog open={open} onClose={handleClose} maxWidth="sm" fullWidth>
         <DialogTitle sx={{ fontWeight: 600 }}>
-          Create Super Admin
+          Create Admin Account
           <IconButton
             onClick={handleClose}
             sx={{ position: "absolute", right: 16, top: 16 }}
@@ -105,4 +106,4 @@ const CreateSuperAdminButton = ({ onCreated }) => {
   );
 };
 
-export default CreateSuperAdminButton;
+export default CreateAdminButton;

@@ -4,6 +4,7 @@ import SettingsIcon from "@mui/icons-material/Settings";
 
 import SearchInput from "../../components/ui/SearchInput";
 import AccountListItem from "../../components/ui/AccountListItem";
+import CreateScholarButton from "./createAccounts/createScholar";
 
 // MUI Dialog imports
 import Dialog from "@mui/material/Dialog";
@@ -91,6 +92,7 @@ const ScholarAccounts = () => {
       <div className="flex items-center gap-2 mb-4">
         <p className="text-gray-600">MANAGE SCHOLAR ACCOUNTS</p>
         <SettingsIcon className="text-gray-400" />
+        <CreateScholarButton onCreated={fetchScholars} />
       </div>
 
       <SearchInput onSearch={setSearch} />

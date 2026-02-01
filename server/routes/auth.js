@@ -22,45 +22,55 @@ const generateToken = (id) => {
 };
 
 // Register - New users are always created as regular users (role_id = 1)
-router.post("/register", protect, hasRole("admin", "super-admin"), async (req, res) => {
-  const { name, email, password } = req.body;
+router.post("/register-user", protect, hasRole("admin", "super-admin"), async (req, res) => {
+  try {
+    const { name, email, password } = req.body;
 
-  if (!name || !email || !password) {
-    return res.status(400).json({ message: "Please provide all required fields" });
+    // 1. Validation
+    if (!name || !email || !password) {
+      return res.status(400).json({ message: "Please provide all required fields" });
+    }
+
+    if (password.length < 6) {
+      return res.status(400).json({ message: "Password must be at least 6 characters" });
+    }
+
+    // 2. Check if user already exists
+    const userExists = await pool.query("SELECT * FROM users WHERE email = $1", [email]);
+    if (userExists.rows.length > 0) {
+      return res.status(400).json({ message: "User already exists" });
+    }
+
+    // 3. Hash password and insert
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    // Note: ensure role_id 1 matches your intended 'Scholar' or 'User' role
+    const newUser = await pool.query(
+      `INSERT INTO users (name, email, password, role_id) 
+       VALUES ($1, $2, $3, 1) 
+       RETURNING id, name, email`,
+      [name, email, hashedPassword]
+    );
+
+    // 4. Get the full user data including the role name
+    const userWithRole = await pool.query(
+      `SELECT u.id, u.name, u.email, r.name as role 
+       FROM users u 
+       LEFT JOIN roles r ON u.role_id = r.id 
+       WHERE u.id = $1`,
+      [newUser.rows[0].id]
+    );
+
+    // SUCCESS: We return the user data but DO NOT set a new cookie
+    return res.status(201).json({ 
+      message: "User created successfully",
+      user: userWithRole.rows[0] 
+    });
+
+  } catch (error) {
+    console.error("Registration Error:", error);
+    res.status(500).json({ message: "Server error" });
   }
-
-  if (password.length < 6) {
-    return res.status(400).json({ message: "Password must be at least 6 characters" });
-  }
-
-  const userExists = await pool.query("SELECT * FROM users WHERE email = $1", [email]);
-
-  if (userExists.rows.length > 0) {
-    return res.status(400).json({ message: "User already exists" });
-  }
-
-  const hashedPassword = await bcrypt.hash(password, 10);
-
-  // Always create new users as regular users (role_id = 1)
-  const newUser = await pool.query(
-    `INSERT INTO users (name, email, password, role_id) 
-     VALUES ($1, $2, $3, 1) 
-     RETURNING id, name, email`,
-    [name, email, hashedPassword]
-  );
-
-  const userWithRole = await pool.query(
-    `SELECT u.id, u.name, u.email, r.name as role 
-     FROM users u 
-     LEFT JOIN roles r ON u.role_id = r.id 
-     WHERE u.id = $1`,
-    [newUser.rows[0].id]
-  );
-
-  const token = generateToken(newUser.rows[0].id);
-  res.cookie("token", token, cookieOptions);
-
-  return res.status(201).json({ user: userWithRole.rows[0] });
 });
 
 // Login

@@ -10,6 +10,61 @@ const router = express.Router();
 // Get all users
 // Admin: can see only regular users (role_id = 1)
 // Super-admin: can see everyone
+router.get("/", protect, hasRole("super-admin"), async (req, res) => {
+  try {
+    let query = `
+      SELECT u.id, u.name, u.email, u.created_at, r.name as role
+      FROM users u
+      LEFT JOIN roles r ON u.role_id = r.id
+    `;
+
+    query += " ORDER BY u.created_at DESC";
+
+    const users = await pool.query(query);
+    res.json(users.rows);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Server error" });
+  }
+});
+
+// routes/users.js
+router.get("/stats", protect, hasRole("super-admin"), async (req, res) => {
+  try {
+    const totalScholars = await pool.query(
+      `SELECT COUNT(*) 
+       FROM users u
+       JOIN roles r ON u.role_id = r.id
+       WHERE r.name = 'user'`
+    );
+
+    const totalAdmins = await pool.query(
+      `SELECT COUNT(*) 
+       FROM users u
+       JOIN roles r ON u.role_id = r.id
+       WHERE r.name = 'admin'`
+    );
+
+    const totalSuperAdmins = await pool.query(
+      `SELECT COUNT(*) 
+       FROM users u
+       JOIN roles r ON u.role_id = r.id
+       WHERE r.name = 'super-admin'`
+    );
+
+    res.json({
+      totalScholars: Number(totalScholars.rows[0].count),
+      totalAdmins: Number(totalAdmins.rows[0].count),
+      totalSuperAdmins: Number(totalSuperAdmins.rows[0].count),
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Server error" });
+  }
+});
+
+
+
 router.get("/scholar-accounts", protect, hasRole("admin", "super-admin"), async (req, res) => {
   try {
     let query = `
@@ -67,81 +122,50 @@ router.get("/admin-accounts", protect, hasRole("super-admin"), async (req, res) 
   }
 });
 
-
-
 // Create admin account - Only super-admin can do this
 router.post("/create-admin", protect, hasRole("super-admin"), async (req, res) => {
   try {
     const { name, email, password, role } = req.body;
 
-    // Validate input
-    if (!name || !email || !password) {
+    // 1. Validation
+    if (!name || !email || !password || !role) {
       return res.status(400).json({ message: "Please provide all required fields" });
     }
 
-    if (password.length < 6) {
-      return res.status(400).json({ message: "Password must be at least 6 characters" });
-    }
-
-    // Validate role
-    const validRoles = ['admin', 'super-admin'];
-    if (!role || !validRoles.includes(role)) {
-      return res.status(400).json({ 
-        message: "Invalid role. Must be 'admin' or 'super-admin'" 
-      });
-    }
-
-    // Check if user already exists
-    const userExists = await pool.query(
-      "SELECT * FROM users WHERE email = $1",
-      [email]
-    );
-
-    if (userExists.rows.length > 0) {
-      return res.status(400).json({ message: "User with this email already exists" });
-    }
-
-    // Get role_id from role name
-    const roleQuery = await pool.query(
-      "SELECT id FROM roles WHERE name = $1",
-      [role]
-    );
-
+    // 2. Map the role string to the ID in your DB
+    // Ensure 'super-admin' exists in your 'roles' table!
+    const roleQuery = await pool.query("SELECT id FROM roles WHERE name = $1", [role]);
+    
     if (roleQuery.rows.length === 0) {
-      return res.status(400).json({ message: "Invalid role" });
+      return res.status(400).json({ message: "Invalid Role" });
     }
-
     const role_id = roleQuery.rows[0].id;
 
-    // Hash password
+    // 3. Hash Password
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    // Create admin user
+    // 4. Insert User (Using all 4 variables)
     const newUser = await pool.query(
       `INSERT INTO users (name, email, password, role_id) 
        VALUES ($1, $2, $3, $4) 
-       RETURNING id, name, email, role_id`,
+       RETURNING id, name, email`,
       [name, email, hashedPassword, role_id]
     );
 
-    // Get user with role name
-    const userWithRole = await pool.query(
-      `SELECT u.id, u.name, u.email, u.created_at, r.name as role
-       FROM users u
-       LEFT JOIN roles r ON u.role_id = r.id
-       WHERE u.id = $1`,
-      [newUser.rows[0].id]
-    );
-
     res.status(201).json({
-      message: `${role.charAt(0).toUpperCase() + role.slice(1)} account created successfully`,
-      user: userWithRole.rows[0]
+      message: "Account created successfully",
+      user: newUser.rows[0]
     });
+
   } catch (error) {
+    if (error.code === '23505') { // Postgres unique violation code
+      return res.status(400).json({ message: "Email already exists" });
+    }
     console.error(error);
     res.status(500).json({ message: "Server error" });
   }
 });
+
 
 // Get single user
 // User: can view own data
