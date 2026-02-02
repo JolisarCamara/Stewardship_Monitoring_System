@@ -1,4 +1,5 @@
 import React from 'react';
+import RulesMobile from '../superAdmin/mobileVersion/Rules'; // Import the new file
 
 const hoursTable = [
   { range: '0 - 499', hours: '80 Hours' },
@@ -21,67 +22,53 @@ const policies = [
 
 export default function Rules() {
   return (
-    <div>
-      <h1 className="text-2xl md:text-3xl font-bold text-[#3D5A80] mb-6">RULES</h1>
-
-      {/* Program Title */}
-      <div className="mb-8">
-        <h2 className="text-xl font-bold text-gray-800 mb-2">
-          Stewardship Program for GLC Scholarship
-        </h2>
-        <p className="text-gray-600 text-sm">
-          The GLC Scholarship requires scholars to complete stewardship service hours as part of the college's 
-          commitment to service, volunteerism, and community involvement. This requirement is necessary for 
-          scholarship retention and renewal.
-        </p>
+    <div className="p-4 md:p-0">
+      {/* MOBILE ONLY VIEW */}
+      <div className="block md:hidden">
+        <RulesMobile hoursTable={hoursTable} policies={policies} />
       </div>
 
-      {/* Required Hours Section */}
-     <div className="flex justify-center mt-8">
-  <div className="w-full">
-    <h3 className="text-lg font-semibold text-gray-800 mb-3 underline">
-      Required Stewardship Hours
-    </h3>
+      {/* DESKTOP ONLY VIEW (Your Original Style) */}
+      <div className="hidden md:block">
+        <h1 className="text-3xl font-bold text-[#3D5A80] mb-6">RULES</h1>
 
-    <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
+        <div className="mb-8">
+          <h2 className="text-xl font-bold text-gray-800 mb-2">Stewardship Program for GLC Scholarship</h2>
+          <p className="text-gray-600 text-sm">
+               The GLC Scholarship requires scholars to complete stewardship service hours as part of the college’s commitment to service,volunteerism, and community involvement. This requirement is necessary for scholarship retention and renewal.
+          </p>
+        </div>
+
+        <div className="mb-8">
+          <h3 className="text-lg font-semibold text-gray-800 mb-3 underline">Required Stewardship Hours</h3>
+          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
+            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
       <p className="text-sm font-semibold text-gray-700 mb-3">
-        School Fee Contribution and Minimum Required Hours
+        Counterpart and Required Hours
       </p>
-
-      {/* TABLE */}
-      <div className="grid grid-cols-2 gap-3">
-        {hoursTable.map((item, index) => (
-          <div
-            key={index}
-            className="flex justify-between items-center bg-gray-100 px-4 py-2 rounded text-sm"
-          >
-            <span className="text-gray-700">{item.range}</span>
-            <span className="font-semibold text-gray-800">{item.hours}</span>
+             <div className="grid grid-cols-2 gap-3">
+              {hoursTable.map((item, index) => (
+                <div key={index} className="flex justify-between items-center bg-gray-100 px-4 py-2 rounded text-sm">
+                  <span className="text-gray-700">{item.range}</span>
+                  <span className="font-semibold text-gray-800">{item.hours}</span>
+                </div>
+              ))}
+            </div>
           </div>
-        ))}
+        </div>
       </div>
-
-      <p className="text-xs text-gray-600 mt-4">
-        Fourth-year students with OJT/internship must complete at least half of the required hours.
-      </p>
-    </div>
-  </div>
-</div>
-
-
-      {/* Key Policies Section */}
-      <div>
-        <h3 className="text-lg font-bold text-gray-800 mb-4">Key Policies and Guidelines</h3>
-        
-        <div className="bg-white rounded-lg border border-gray-200 p-6">
-          <ul className="space-y-3">
-            {policies.map((policy, index) => (
-              <li key={index} className="flex items-start gap-3 text-gray-600">
-                <span className="text-[#C9A227] mt-1">•</span>
-                <span>{policy}</span>
-              </li>
-            ))}
-          </ul>
+        <div>
+          <h3 className="text-lg font-bold text-gray-800 mb-4">Key Policies and Guidelines</h3>
+          <div className="bg-white rounded-lg border border-gray-200 p-6">
+            <ul className="space-y-3">
+              {policies.map((policy, index) => (
+                <li key={index} className="flex items-start gap-3 text-gray-600">
+                  <span className="text-[#C9A227] mt-1">•</span>
+                  <span>{policy}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
         </div>
       </div>
     </div>

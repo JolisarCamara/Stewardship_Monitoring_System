@@ -15,13 +15,16 @@ const LogoutButton = ({ setUser }) => {
   };
 
   return (
-    <div className="fixed bottom-5 left-1 right-1 mb-2 bg-navy rounded-lg ">
-             <button
-              onClick={handleLogout}
-              className="w-full text-center px-4 py-3 text-white rounded-lg flex hover:bg-white/10 transition-colors text-sm border-t border-white/10"
-            >Logout</button>
+    <div className="w-full mt-auto p-3 shrink-0 border-t border-white/10 bg-[#24324D]">
+    <button
+      onClick={handleLogout}
+      className="w-full text-center py-3 text-white rounded-lg transition-colors text-sm font-bold border border-white/20 
+                 bg-[#24324D] hover:bg-[#3d4a66]"
+    >
+      LOGOUT
+    </button>
     </div>
-  )
+  );
 };
 
 export default LogoutButton;

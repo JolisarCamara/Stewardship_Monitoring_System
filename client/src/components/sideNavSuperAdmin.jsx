@@ -1,6 +1,7 @@
 import { NavLink } from "react-router-dom";
 import LogoutButton from "./LogoutButton";
- 
+import MobileDrawer from "../components/ui/mobileDrawer"; // Import the new file
+
 const SideBar_superAdmin = ({ children, setUser }) => {
   const navItems = [
     { label: "DASHBOARD", path: "/superadmin-dashboard" },
@@ -11,10 +12,16 @@ const SideBar_superAdmin = ({ children, setUser }) => {
     { label: "ACTIVITY LOGS", path: "/superadmin-dashboard/activity-logs" },
   ];
 
-  
   return (
     <div className="flex min-h-screen bg-[#e6e6e6]">
-      <aside className="w-[200px] h-screen bg-navy-dark fixed left-0 top-0 flex flex-col font-inter">
+      {/* MOBILE VERSION */}
+      <MobileDrawer 
+        navItems={navItems} 
+        logoutComponent={<LogoutButton setUser={setUser} />} 
+      />
+
+      {/* DESKTOP VERSION (Hidden on mobile) */}
+      <aside className="hidden md:flex w-[200px] h-screen bg-[#24324D] fixed left-0 top-0 flex flex-col font-inter">
         <div className="p-6">
           <div className="w-full h-[100px] flex items-center justify-center">
             <img src="/logo.png" alt="Logo" />
@@ -36,12 +43,19 @@ const SideBar_superAdmin = ({ children, setUser }) => {
             </NavLink>
           ))}
         </nav>
+        
+        <div className="mt-auto p-4 flex justify-center border-t border-white/10">
+          <LogoutButton setUser={setUser} />
+        </div>
       </aside>
 
-      <main className="ml-[200px] flex-1 p-10">
-        {children}
+      {/* MAIN CONTENT AREA */}
+      <main className="flex-1 p-6 md:p-10 md:ml-[200px]">
+        {/* Adds space at the top on mobile so the burger icon doesn't overlap text */}
+        <div className="mt-12 md:mt-0">
+          {children}
+        </div>
       </main>
-          <LogoutButton setUser={setUser}/>
     </div>
   );
 };

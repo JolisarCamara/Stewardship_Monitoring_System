@@ -2,6 +2,8 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 import SettingsIcon from "@mui/icons-material/Settings";
 
+//Mobile Version
+
 import SearchInput from "../../components/ui/SearchInput";
 import AccountListItem from "../../components/ui/AccountListItem";
 import CreateAdminButton from "./createAccounts/createAdmin";
@@ -98,59 +100,108 @@ const AdminAccounts = () => {
       <CreateAdminButton onCreated={fetchAdmins} />
 
       <div className="space-y-3 mt-6">
-        {filteredAdmins.map((admin) => (
-          <AccountListItem
-            key={admin.id}
-            name={admin.name}
-            email={admin.email}
-            onEdit={() => handleOpenEdit(admin)}
-            onDelete={() => handleOpenDelete(admin)}
-          />
-        ))}
-      </div>
-
+        {filteredAdmins.length > 0 ? (
+          filteredAdmins.map((admin) => (
+            <AccountListItem
+              key={admin.id}
+              name={admin.name}
+              email={admin.email}
+              onEdit={() => handleOpenEdit(admin)}
+              onDelete={() => handleOpenDelete(admin)}
+            />
+          ))
+        ) : (
+          <div className="bg-white/50 border-2  border-gray-300 rounded-2xl py-12 text-center">
+            <p className="text-gray-400 text-sm font-medium">No account found </p>
+          </div>
+        )}
+    </div>
       {/* ================= EDIT DIALOG ================= */}
-      <Dialog open={openEdit} onClose={handleCloseDialogs} maxWidth="sm" fullWidth>
-        <DialogTitle  sx={{ fontWeight: 600 }}>
-          Edit Admin
-          <IconButton onClick={handleCloseDialogs}
-          sx={{ position: "absolute", right: 16, top: 16 }} >
-            <CloseIcon/>
-          </IconButton>
+              <Dialog 
+          open={openEdit} 
+          onClose={handleCloseDialogs} 
+          maxWidth="sm" 
+          fullWidth
+          PaperProps={{
+            sx: { borderRadius: '28px', p: 2 } // Matches the rounded corners in image_2d7d2a.png
+          }}
+        >
+          <DialogTitle sx={{ textAlign: 'center', pt: 4 }}>
+            <IconButton
+              onClick={handleCloseDialogs}
+              sx={{ position: "absolute", right: 20, top: 20, color: 'gray' }}
+            >
+              <CloseIcon />
+            </IconButton>
+            
+            {/* Fingerprint Logo from image_2d7d2a.png */}
+            <div className="flex justify-center mb-4">
+              <img src="/logo.png" alt="Logo" className="h-24 w-auto" />
+            </div>
+
+            <h2 className="text-2xl font-bold text-[#24324D] mb-1">Edit Admin Details</h2>
+            <p className="text-sm text-gray-500 font-normal">Please update the information for this administrator</p>
           </DialogTitle>
 
-        <DialogContent className="flex flex-col gap-4 mt-2" dividers>
-          <Stack spacing={2} mt={1}>
-          <TextField
-            label="Name"
-            value={editName}
-            onChange={(e) => setEditName(e.target.value)}
-            className="bg-gray-50 border-gray-200"
-            fullWidth
-          />
-          <TextField
-            label="Email"
-            value={editEmail}
-            onChange={(e) => setEditEmail(e.target.value)}
-            fullWidth
-          />
-          </Stack>
-        </DialogContent>
+          <DialogContent sx={{ border: 'none', px: 4 }}>
+            <Stack spacing={2.5} mt={2}>
+              <TextField
+                placeholder="Name"
+                value={editName}
+                onChange={(e) => setEditName(e.target.value)}
+                fullWidth
+                variant="standard"
+                InputProps={{
+                  disableUnderline: true,
+                  sx: {
+                    bgcolor: '#F3F4F6', // Light gray background from image_2d7d2a.png
+                    borderRadius: '12px',
+                    px: 2,
+                    py: 1,
+                    fontSize: '0.9rem'
+                  }
+                }}
+              />
+              <TextField
+                placeholder="Email Address"
+                value={editEmail}
+                onChange={(e) => setEditEmail(e.target.value)}
+                fullWidth
+                variant="standard"
+                InputProps={{
+                  disableUnderline: true,
+                  sx: {
+                    bgcolor: '#F3F4F6',
+                    borderRadius: '12px',
+                    px: 2,
+                    py: 1,
+                    fontSize: '0.9rem'
+                  }
+                }}
+              />
+            </Stack>
+          </DialogContent>
 
-        <DialogActions sx={{ p: 2 }}>
-          <Button 
-          variant="contained" 
-          sx={{
-            bgcolor: "#415a77",
-            "&:hover": { bgcolor: "#344966" }
-          }}
-          onClick={handleUpdate}
-          >
-
-            Save
-          </Button>
-        </DialogActions>
-      </Dialog>
+          <DialogActions sx={{ justifyContent: 'center', pb: 5, pt: 3 }}>
+            <Button
+              variant="contained"
+              fullWidth
+              sx={{
+                mx: 4,
+                py: 1.5,
+                bgcolor: "#24324D", // Navy blue from image_2d7d2a.png
+                borderRadius: "12px",
+                fontWeight: "bold",
+                textTransform: "uppercase",
+                letterSpacing: "1px",
+                "&:hover": { bgcolor: "#1a263e" }
+              }}
+              onClick={handleUpdate}
+            >
+              Confirm Update
+            </Button>
+          </DialogActions>
+        </Dialog>
 
       {/* ================= DELETE DIALOG ================= */}
       <Dialog open={openDelete} onClose={handleCloseDialogs}>
@@ -172,7 +223,7 @@ const AdminAccounts = () => {
           </Button>
         </DialogActions>
       </Dialog>
-    </div>
+      </div>   
   );
 };
 
