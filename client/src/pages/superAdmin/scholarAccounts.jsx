@@ -15,210 +15,291 @@ import TextField from "@mui/material/TextField";
 import Button from "@mui/material/Button";
 import IconButton from "@mui/material/IconButton";
 import Stack from "@mui/material/Stack";
-import CloseIcon from '@mui/icons-material/Close';
+import CloseIcon from "@mui/icons-material/Close";
+import { Tooltip, Box, Typography } from "@mui/material";
+
+import useMediaQuery from "@mui/material/useMediaQuery";
+import { useTheme } from "@mui/material/styles";
 
 const ScholarAccounts = () => {
   const [scholars, setScholars] = useState([]);
   const [search, setSearch] = useState("");
 
-  // Ui Dialog
+  const [openInfo, setOpenInfo] = useState(false);
   const [openEdit, setOpenEdit] = useState(false);
   const [openDelete, setOpenDelete] = useState(false);
   const [selectedScholars, setSelectedScholars] = useState(null);
 
-  // Edit form
-  const [editName, setEditName] = useState("");
-  const [editEmail, setEditEmail] = useState("");
+  const [editFormData, setEditFormData] = useState({
+    name: "",
+    password: "",
+    email: "",
+    student_id: "",
+    course: "",
+    year_level: "",
+    designation: "",
+    committed_day: "",
+    committed_time: "",
+    required_stewardship_hours: "",
+    counterpart: "",
+    coordinator: ""
+  });
 
-  // Get Scholar Accounts
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
+
   const fetchScholars = async () => {
-    const res = await axios.get("/api/users/scholar-accounts");
-    setScholars(res.data);
+    try {
+      const res = await axios.get("/api/users/scholar-accounts");
+      setScholars(res.data);
+    } catch (err) {
+      console.error("Error fetching scholars:", err);
+    }
   };
 
   useEffect(() => {
     fetchScholars();
   }, []);
 
-  // Open dialogs
-  const handleOpenEdit = (scholars) => {
-    setSelectedScholars(scholars);
-    setEditName(scholars.name);
-    setEditEmail(scholars.email);
+  const handleOpenEdit = (scholar) => {
+    setSelectedScholars(scholar);
+    setEditFormData(scholar); 
     setOpenEdit(true);
   };
 
-  const handleOpenDelete = (scholars) => {
-    setSelectedScholars(scholars);
+  const handleEditChange = (e) => {
+    setEditFormData({ ...editFormData, [e.target.name]: e.target.value });
+  };
+
+  const handleOpenDelete = (scholar) => {
+    setSelectedScholars(scholar);
     setOpenDelete(true);
   };
 
   const handleCloseDialogs = () => {
     setOpenEdit(false);
     setOpenDelete(false);
+    setOpenInfo(false);
     setSelectedScholars(null);
   };
 
-  // Update Scholars
   const handleUpdate = async () => {
-    await axios.put(`/api/users/${selectedScholars.id}`, {
-      name: editName,
-      email: editEmail,
-    });
-    fetchScholars();
-    handleCloseDialogs();
+    try {
+      await axios.put(`/api/users/${selectedScholars.id}`, editFormData);
+      fetchScholars();
+      handleCloseDialogs();
+    } catch (err) {
+      console.error("Update error:", err);
+    }
   };
 
-  // Delete Scholars
   const handleConfirmDelete = async () => {
-    await axios.delete(`/api/users/${selectedScholars.id}`);
-    fetchScholars();
-    handleCloseDialogs();
+    try {
+      await axios.delete(`/api/users/${selectedScholars.id}`);
+      fetchScholars();
+      handleCloseDialogs();
+    } catch (err) {
+      console.error("Delete error:", err);
+    }
   };
 
-  // Search filter
   const filteredScholars = scholars.filter(
-    (scholars) =>
-      scholars.name.toLowerCase().includes(search.toLowerCase()) ||
-      scholars.email.toLowerCase().includes(search.toLowerCase())
+    (s) =>
+      s.name.toLowerCase().includes(search.toLowerCase()) ||
+      s.email.toLowerCase().includes(search.toLowerCase())
   );
 
+  const InfoPreview = ({ s }) => (
+    <Box sx={{ p: 1 }}>
+      <Typography variant="caption" display="block"><strong>Student ID:</strong> {s.student_id}</Typography>
+      <Typography variant="caption" display="block"><strong>Course:</strong> {s.course}</Typography>
+      <Typography variant="caption" display="block"><strong>Coordinator:</strong> {s.coordinator}</Typography>
+      <Typography variant="caption" display="block"><strong>Hours:</strong> {s.required_stewardship_hours} hrs</Typography>
+    </Box>
+  );
+
+  const inputStyle = { bgcolor: "#F5F5F5", borderRadius: "12px", px: 2, py: 1, "& .MuiInputBase-input": { fontSize: "0.85rem" } };
+
   return (
-    <div>
-      <h1 className="text-4xl font-bold text-[#3D5A80] mb-6">
+    <div className="px-4 sm:px-6 lg:px-10 py-6">
+      {/* HEADER */}
+      <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-[#3D5A80] mb-4">
         SCHOLAR ACCOUNTS
       </h1>
 
-      <div className="flex items-center gap-2 mb-4">
-        <p className="text-gray-600">MANAGE SCHOLAR ACCOUNTS</p>
+      <div className="flex items-center gap-2 mb-6">
+        <p className="text-xs sm:text-sm text-gray-600">MANAGE SCHOLAR ACCOUNTS</p>
         <SettingsIcon className="text-gray-400" />
+      </div>
+
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <SearchInput onSearch={setSearch} />
         <CreateScholarButton onCreated={fetchScholars} />
       </div>
 
-      <SearchInput onSearch={setSearch} />
-
+      {/* LIST */}
       <div className="space-y-3 mt-6">
-              {filteredScholars.length > 0 ? (
-                filteredScholars.map((scholars) => (
-                  <AccountListItem
-                    key={scholars.id}
-                    name={scholars.name}
-                    email={scholars.email}
-                    onEdit={() => handleOpenEdit(scholars)}
-                    onDelete={() => handleOpenDelete(scholars)}
-                  />
-                ))
-              ) : (
-                <div className="bg-white/50 border-2  border-gray-300 rounded-2xl py-12 text-center">
-                  <p className="text-gray-400 text-sm font-medium">No account found </p>
-                </div>
-              )}
-          </div>
-      {/* ================= EDIT DIALOG ================= */}
-                    <Dialog 
-                open={openEdit} 
-                onClose={handleCloseDialogs} 
-                maxWidth="sm" 
-                fullWidth
-                PaperProps={{
-                  sx: { borderRadius: '28px', p: 2 } // Matches the rounded corners in image_2d7d2a.png
-                }}
+        {filteredScholars.length > 0 ? (
+          filteredScholars.map((scholar) => (
+            <Tooltip
+              key={scholar.id}
+              title={<InfoPreview s={scholar} />}
+              arrow
+              placement="top-start"
+            >
+              <div 
+                onClick={() => { setSelectedScholars(scholar); setOpenInfo(true); }} 
+                className="cursor-pointer"
               >
-                <DialogTitle sx={{ textAlign: 'center', pt: 4 }}>
-                  <IconButton
-                    onClick={handleCloseDialogs}
-                    sx={{ position: "absolute", right: 20, top: 20, color: 'gray' }}
-                  >
-                    <CloseIcon />
-                  </IconButton>
-                  
-                  {/* Fingerprint Logo from image_2d7d2a.png */}
-                  <div className="flex justify-center mb-4">
-                    <img src="/logo.png" alt="Logo" className="h-24 w-auto" />
-                  </div>
+                <AccountListItem
+                  name={scholar.name}
+                  email={scholar.email}
+                  onEdit={(e) => { 
+                    e.stopPropagation(); 
+                    handleOpenEdit(scholar); 
+                  }}
+                  onDelete={(e) => { 
+                    e.stopPropagation(); 
+                    handleOpenDelete(scholar); 
+                  }}
+                />
+              </div>
+            </Tooltip>
+          ))
+        ) : (
+          <div className="border rounded-xl py-12 text-center text-gray-400">
+            No account found
+          </div>
+        )}
+      </div>
 
-                  <h2 className="text-2xl font-bold text-[#24324D] mb-1">Edit Scholar Details</h2>
-                  <p className="text-sm text-gray-500 font-normal">Please update the information for this scholar</p>
-                </DialogTitle>
+      {/* SCHOLAR INFORMATION DIALOG (Clicked) */}
+      <Dialog 
+        open={openInfo} 
+        onClose={handleCloseDialogs} 
+        maxWidth="sm" 
+        fullWidth
+        PaperProps={{sx: { borderRadius: "2.5rem", border: "4px solid #2D3E50", padding: "2rem" }}}
+      >
+        <DialogContent>
+          <Stack spacing={3} alignItems="center">
+            <img src="/logo.png" alt="Logo" className="w-40 h-32 object-contain" />
+            <IconButton onClick={handleCloseDialogs} sx={{ position: "absolute", right: 24, top: 24 }}>
+              <CloseIcon />
+            </IconButton>
 
-                <DialogContent sx={{ border: 'none', px: 4 }}>
-                  <Stack spacing={2.5} mt={2}>
-                    <TextField
-                      placeholder="Name"
-                      value={editName}
-                      onChange={(e) => setEditName(e.target.value)}
-                      fullWidth
-                      variant="standard"
-                      InputProps={{
-                        disableUnderline: true,
-                        sx: {
-                          bgcolor: '#F3F4F6', // Light gray background from image_2d7d2a.png
-                          borderRadius: '12px',
-                          px: 2,
-                          py: 1,
-                          fontSize: '0.9rem'
-                        }
-                      }}
-                    />
-                    <TextField
-                      placeholder="Email Address"
-                      value={editEmail}
-                      onChange={(e) => setEditEmail(e.target.value)}
-                      fullWidth
-                      variant="standard"
-                      InputProps={{
-                        disableUnderline: true,
-                        sx: {
-                          bgcolor: '#F3F4F6',
-                          borderRadius: '12px',
-                          px: 2,
-                          py: 1,
-                          fontSize: '0.9rem'
-                        }
-                      }}
-                    />
-                  </Stack>
-                </DialogContent>
+            <div style={{ textAlign: "center" }}>
+              <Typography variant="h5" sx={{ fontWeight: 800, color: "#2D3E50" }}>
+                Scholar Information
+              </Typography>
+            </div>
 
-                <DialogActions sx={{ justifyContent: 'center', pb: 5, pt: 3 }}>
-                  <Button
-                    variant="contained"
-                    fullWidth
-                    sx={{
-                      mx: 4,
-                      py: 1.5,
-                      bgcolor: "#24324D", // Navy blue from image_2d7d2a.png
-                      borderRadius: "12px",
-                      fontWeight: "bold",
-                      textTransform: "uppercase",
-                      letterSpacing: "1px",
-                      "&:hover": { bgcolor: "#1a263e" }
-                    }}
-                    onClick={handleUpdate}
-                  >
-                    Confirm Update
-                  </Button>
-                </DialogActions>
-              </Dialog>
+            {selectedScholars && (
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-2 w-full text-sm mt-2">
+                <p><strong>Student ID:</strong> {selectedScholars.student_id}</p>
+                <p><strong>Course/Year:</strong> {selectedScholars.course} - {selectedScholars.year_level}</p>
+                <p><strong>Designation:</strong> {selectedScholars.designation}</p>
+                <p><strong>Hours:</strong> {selectedScholars.required_stewardship_hours}</p>
+                <p><strong>Coordinator:</strong> {selectedScholars.coordinator}</p>
+                <p><strong>Counterpart:</strong> ₱{selectedScholars.counterpart}</p>
+                <p className="sm:col-span-2"><strong>Schedule:</strong> {selectedScholars.committed_day} ({selectedScholars.committed_time})</p>
+              </div>
+            )}
+          </Stack>
+        </DialogContent>
+      </Dialog>
 
-      {/* ================= DELETE DIALOG ================= */}
+      {/* EDIT DIALOG */}
+              <Dialog
+          open={openEdit}
+          onClose={handleCloseDialogs}
+          maxWidth="sm"
+          fullWidth
+          PaperProps={{
+            sx: {
+              borderRadius: "2.5rem", // Extra rounded corners from your image
+              border: "4px solid #2D3E50", // The thick navy border
+              padding: "2rem",
+              overflow: "hidden",
+            },
+          }}
+        >
+          <DialogContent>
+            <Stack spacing={3} alignItems="center">
+              {/* Close Icon */}
+              <IconButton 
+                onClick={handleCloseDialogs} 
+                sx={{ position: "absolute", right: 24, top: 24 }}
+              >
+                <CloseIcon />
+              </IconButton>
+
+              {/* Centered Logo/Icon */}
+              <img src="/logo.png" alt="Logo" className="h-24 w-auto object-contain" />
+
+              {/* Header Text */}
+              <div className="text-center">
+                <Typography variant="h5" sx={{ fontWeight: 800, color: "#2D3E50" }}>
+                  Edit Scholar Account
+                </Typography>
+                <Typography variant="body2" sx={{ color: "gray", mt: 0.5 }}>
+                  Please insert the details of the scholar
+                </Typography>
+              </div>
+
+              {/* Compact Inputs */}
+              <Stack spacing={1.5} width="100%" sx={{ mt: 1 }}>
+                <TextField
+                  name="name"
+                  value={editFormData.name || ""}
+                  onChange={handleEditChange}
+                  placeholder="Name"
+                  variant="standard"
+                  InputProps={{ disableUnderline: true }}
+                  sx={inputStyle}
+                />
+                <TextField
+                  name="email"
+                  value={editFormData.email || ""}
+                  onChange={handleEditChange}
+                  placeholder="Email Address"
+                  variant="standard"
+                  InputProps={{ disableUnderline: true }}
+                  sx={inputStyle}
+                />
+              </Stack>
+
+              {/* Centered Confirm Button */}
+              <Button
+                variant="contained"
+                sx={{
+                  mt: 2,
+                  bgcolor: "#2D3E50",
+                  color: "white",
+                  fontWeight: "bold",
+                  borderRadius: "12px",
+                  py: 1.5,
+                  width: "60%", // Shorter width to match screenshot
+                  letterSpacing: "1px",
+                  "&:hover": { bgcolor: "#1e2a36" },
+                }}
+                onClick={handleUpdate}
+              >
+                CONFIRM
+              </Button>
+            </Stack>
+          </DialogContent>
+        </Dialog>
+            
+      {/* DELETE DIALOG */}
       <Dialog open={openDelete} onClose={handleCloseDialogs}>
         <DialogTitle>Delete Scholar</DialogTitle>
-
         <DialogContent>
-          Are you sure you want to delete{" "}
-          <strong>{selectedScholars?.name}</strong>?
+          Delete <strong>{selectedScholars?.name}</strong>?
         </DialogContent>
-
         <DialogActions>
           <Button onClick={handleCloseDialogs}>Cancel</Button>
-          <Button
-            variant="contained"
-            color="error"
-            onClick={handleConfirmDelete}
-          >
-            Delete
-          </Button>
+          <Button variant="contained" color="error" onClick={handleConfirmDelete}>Delete</Button>
         </DialogActions>
       </Dialog>
     </div>

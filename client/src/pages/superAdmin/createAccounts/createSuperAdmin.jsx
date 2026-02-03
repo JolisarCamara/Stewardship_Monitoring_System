@@ -1,3 +1,4 @@
+// createAccounts/createSuperAdmin.jsx
 import { useState } from "react";
 import axios from "axios";
 import {
@@ -10,12 +11,17 @@ import {
   IconButton,
 } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
+import useMediaQuery from "@mui/material/useMediaQuery";
+import { useTheme } from "@mui/material/styles";
 
 const CreateSuperAdminButton = ({ onCreated }) => {
   const [open, setOpen] = useState(false);
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
 
   const handleClose = () => setOpen(false);
 
@@ -38,15 +44,14 @@ const CreateSuperAdminButton = ({ onCreated }) => {
   };
 
   return (
-    <div className="flex flex-col sm:flex-row justify-center gap-4 mb-6">
+    <div  className="flex flex-col sm:flex-row justify-center gap-4 mb-6">
+      {/* BUTTON */}
       <Button
         variant="contained"
+        fullWidth={isMobile}
         sx={{
-          position: "absolute",
-          right: "2%",
-          top: "15.5%",
+          maxWidth: 260,
           bgcolor: "#C9A227",
-          width: 270,
           textTransform: "none",
           borderRadius: "8px",
           "&:hover": { bgcolor: "#B8960F" },
@@ -56,42 +61,42 @@ const CreateSuperAdminButton = ({ onCreated }) => {
         + Create Super Admin Account
       </Button>
 
+      {/* DIALOG */}
       <Dialog
         open={open}
         onClose={handleClose}
+        fullScreen={isMobile}
         maxWidth="sm"
         fullWidth
         PaperProps={{
           sx: {
-            borderRadius: "2.5rem", // Very rounded corners
-            border: "4px solid #2D3E50", // The thick navy border
-            padding: "2rem",
-            overflow: "hidden",
+            borderRadius: isMobile ? 0 : "2.5rem",
+            border: isMobile ? "none" : "4px solid #2D3E50",
+            p: isMobile ? 2 : 4,
           },
         }}
       >
         <DialogContent>
           <Stack spacing={3} alignItems="center">
-            {/* Logo */}
-            <img src="/logo.png" alt="Logo" className="w-50 h-40" />
             <IconButton
-            onClick={handleClose}
-            sx={{ position: "absolute", right: 16, top: 16 }}  
-          >
-            <CloseIcon/>
+              onClick={handleClose}
+              sx={{ position: "absolute", right: 16, top: 16 }}
+            >
+              <CloseIcon />
             </IconButton>
 
-            <div style={{ textAlign: "center" }}>
-              <Typography variant="h5" sx={{ fontWeight: 800, color: "#2D3E50" }}>
+            <img src="/logo.png" alt="Logo" className="h-32" />
+
+            <div className="text-center">
+              <Typography variant="h5" fontWeight={800}>
                 Add New Super Admin
               </Typography>
-              <Typography variant="body2" sx={{ color: "gray", mt: 1 }}>
+              <Typography variant="body2" color="gray">
                 Please insert the details of the new super admin
               </Typography>
             </div>
 
-            {/* Inputs styled to match the image */}
-            <Stack spacing={2} width="100%" mt={2}>
+            <Stack spacing={2} width="100%">
               <TextField
                 placeholder="Name"
                 value={name}
@@ -106,7 +111,7 @@ const CreateSuperAdminButton = ({ onCreated }) => {
                 onChange={(e) => setEmail(e.target.value)}
                 variant="standard"
                 InputProps={{ disableUnderline: true }}
-              sx={inputStyle}
+                sx={inputStyle}
               />
               <TextField
                 placeholder="Password"
@@ -119,19 +124,15 @@ const CreateSuperAdminButton = ({ onCreated }) => {
               />
             </Stack>
 
-            {/* Confirm Button */}
             <Button
               variant="contained"
               fullWidth
               sx={{
-                mt: 2,
                 bgcolor: "#2D3E50",
-                color: "white",
                 fontWeight: "bold",
                 borderRadius: "12px",
                 py: 1.5,
-                width: "60%",
-                letterSpacing: "1px",
+                maxWidth: 300,
                 "&:hover": { bgcolor: "#1e2a36" },
               }}
               onClick={handleCreate}
@@ -145,15 +146,11 @@ const CreateSuperAdminButton = ({ onCreated }) => {
   );
 };
 
-// Custom style for the fields to get that light-gray "borderless" look
 const inputStyle = {
   bgcolor: "#F5F5F5",
   borderRadius: "12px",
   px: 2,
   py: 1,
-  "& .MuiInputBase-input": {
-    fontSize: "0.95rem",
-  }
 };
 
 export default CreateSuperAdminButton;

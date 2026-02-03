@@ -10,36 +10,47 @@ const MobileDrawer = ({ navItems, logoutComponent }) => {
 
   return (
     <>
+      {/* TRIGGER BUTTON */}
       <div className="md:hidden fixed top-4 left-4 z-50">
         <IconButton 
           onClick={toggleDrawer(true)}
-          sx={{ bgcolor: '#24324D', color: 'white', '&:hover': { bgcolor: '#3d4a66' } }}
+          sx={{ 
+            bgcolor: '#24324D', 
+            color: 'white', 
+            boxShadow: 3,
+            '&:hover': { bgcolor: '#3d4a66' } 
+          }}
         >
           <MenuIcon />
         </IconButton>
       </div>
 
+      {/* DRAWER MENU */}
       <Drawer
         anchor="left"
         open={isOpen}
         onClose={toggleDrawer(false)}
         sx={{
           display: { xs: 'block', md: 'none' },
-          '& .MuiDrawer-paper': { width: 200, bgcolor: '#24324D', border: 'none' },
+          '& .MuiDrawer-paper': { 
+            width: 260, // Slightly wider to accommodate icons + text comfortably
+            bgcolor: '#24324D', 
+            border: 'none',
+            backgroundImage: 'none' // Removes MUI default elevation overlay
+          },
         }}
       >
-        {/* Full height flex container */}
         <div className="h-full flex flex-col font-inter overflow-hidden">
           
-          {/* Logo Area (Fixed top) */}
+          {/* Logo Area */}
           <div className="p-6 shrink-0">
-            <div className="w-full h-[100px] flex items-center justify-center">
-              <img src="/logo.png" alt="Logo" />
+            <div className="w-full h-[80px] flex items-center justify-center">
+              <img src="/logo.png" alt="Logo" className="max-h-full" />
             </div>
           </div>
 
-          {/* Nav Area (This scrolls if content is too long) */}
-          <nav className="flex-1 overflow-y-auto px-3 space-y-1">
+          {/* Nav Area */}
+          <nav className="flex-1 overflow-y-auto px-4 space-y-2">
             {navItems.map((item) => (
               <NavLink
                 key={item.path}
@@ -47,18 +58,24 @@ const MobileDrawer = ({ navItems, logoutComponent }) => {
                 onClick={toggleDrawer(false)}
                 end={item.path === "/superadmin-dashboard"}
                 className={({ isActive }) =>
-                  `h-12 flex items-center text-white font-bold tracking-wide rounded-lg px-4 transition
-                  ${isActive ? "bg-[#3d4a66]" : "hover:bg-[#3d4a66]"}`
+                  `h-12 flex items-center gap-4 text-white font-bold tracking-wide rounded-lg px-4 transition
+                  ${isActive ? "bg-[#3d4a66] shadow-md" : "hover:bg-[#3d4a66]/50"}`
                 }
               >
-                {item.label}
+                {/* Render the MUI Icon passed from parent */}
+                <span className="flex items-center justify-center opacity-90">
+                  {item.icon}
+                </span>
+                <span className="text-sm">{item.label}</span>
               </NavLink>
             ))}
           </nav>
 
-          {/* Logout Area (Fixed bottom) */}
-          <div className="p-4 mt-auto border-t border-white/10 shrink-0 bg-[#24324D]">
-            {logoutComponent}
+          {/* Logout Area */}
+          <div className="p-6 mt-auto border-t border-white/10 shrink-0 bg-[#24324D]">
+            <div className="flex justify-center w-full">
+              {logoutComponent}
+            </div>
           </div>
         </div>
       </Drawer>

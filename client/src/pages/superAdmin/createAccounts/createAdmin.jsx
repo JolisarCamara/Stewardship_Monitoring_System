@@ -39,22 +39,19 @@ const CreateAdminButton = ({ onCreated }) => {
 
   return (
     <div className="flex flex-col sm:flex-row justify-center gap-4 mb-6">
-      <Button
-        variant="contained"
-        sx={{
-          position: "absolute",
-          right: "2%",
-          top: "15.5%",
-          width: 270,
-          bgcolor: "#C9A227",
-          textTransform: "none",
-          borderRadius: "8px",
-          "&:hover": { bgcolor: "#B8960F" },
-        }}
-        onClick={() => setOpen(true)}
-      >
-        + Create Admin Account
-      </Button>
+              <Button
+            variant="contained"
+            fullWidth
+            sx={{
+              maxWidth: 260,
+              bgcolor: "#C9A227",
+              borderRadius: "8px",
+              "&:hover": { bgcolor: "#B8960F" },
+            }}
+            onClick={() => setOpen(true)}
+          >
+            + Create Admin Account
+          </Button>
 
       <Dialog
         open={open}
@@ -157,3 +154,5 @@ const inputStyle = {
 };
 
 export default CreateAdminButton;
+
+
