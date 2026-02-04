@@ -1,16 +1,29 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
-import { BrowserRouter as Router, Routes, Route, Navigate, Outlet } from "react-router-dom";
+import { BrowserRouter as Router, Routes, Route, Navigate} from "react-router-dom";
 
 import ScholarDashboard from "./pages/Scholar/scholarDashboard";
+
+//Admin
 import AdminDashboard from "./pages/Admin/adminDashboard";
+import AdminRoutes from "./pages/Admin/AdminRoutes";
+import AdminRulesPage from "./pages/Admin/rules";
+import AdminStewardshipTask from "./pages/Admin/stewardshipTask";
+import AdminValidationTask from "./pages/Admin/taskValidation";
+
+
+//Super Admin
+import SuperAdminDashboard from "./pages/superAdmin/super-admin-dashboard";
 import SARoutes from "./pages/superAdmin/SARoutes";
-import RulesPage from "./pages/superAdmin/rules";
+import SuperAdminRulesPage from "./pages/superAdmin/rules";
 import AdminsAccounts from "./pages/superAdmin/adminAccounts";
 import ScholarsAccounts from "./pages/superAdmin/scholarAccounts";
 import ActivityLogsPage from "./pages/superAdmin/activityLogPage";
-import SuperAdminDashboard from "./pages/superAdmin/super-admin-dashboard";
 import SuperAdminAccounts from "./pages/superAdmin/super-adminAccounts";
+import SAstewardshipTasks from "./pages/superAdmin/SAstewardshipTask";
+import SAvalidationTasks from "./pages/superAdmin/SAvalidationTask";
+
+//login
 import Login from "./pages/Login";
 
 axios.defaults.withCredentials = true;
@@ -43,68 +56,55 @@ function App() {
   }
 
   return (
-    <Router>
+<Router>
       <Routes>
+        {/* Auth Logic Redirection */}
         <Route
           path="/"
           element={
             user ? (
-              user.role === "user" ? (
-                <Navigate to="/scholar-dashboard" replace />
-              ) : user.role === "admin" ? (
-                <Navigate to="/admin-dashboard" replace />
-              ) : user.role === "super-admin" ? (
-                <Navigate to="/superadmin-dashboard" replace />
-              ) : (
-                <Login setUser={setUser} />
-              )
-            ) : (
+              user.role === "user" ? <Navigate to="/scholar-dashboard" replace /> :
+              user.role === "admin" ? <Navigate to="/admin-dashboard" replace /> :
+              user.role === "super-admin" ? <Navigate to="/superadmin-dashboard" replace /> :
               <Login setUser={setUser} />
-            )
+            ) : <Login setUser={setUser} />
           }
         />
 
+        {/* Scholar Route */}
         <Route
           path="/scholar-dashboard"
-          element={
-            user && user.role === "user" ? (
-              <ScholarDashboard user={user} setUser={setUser} />
-            ) : (
-              <Navigate to="/" replace />
-            )
-          }
+          element={user?.role === "user" ? <ScholarDashboard user={user} setUser={setUser} /> : <Navigate to="/" replace />}
         />
 
+        {/* Admin Dashboard Group */}
         <Route
           path="/admin-dashboard"
-          element={
-            user && user.role === "admin" ? (
-              <AdminDashboard user={user} setUser={setUser} />
-            ) : (
-              <Navigate to="/" replace />
-            )
-          }
-        />
+          element={user?.role === "admin" ? <AdminRoutes user={user} setUser={setUser} /> : <Navigate to="/" replace />}
+        >
+          <Route index element={<AdminDashboard />} />
+          <Route path="stewardship-tasks" element={<AdminStewardshipTask />} />
+          <Route path="validation-tasks" element={<AdminValidationTask />} />
+          <Route path="rules" element={<AdminRulesPage />} />
+        </Route>
 
-
+        {/* Super Admin Dashboard Group */}
         <Route
-  path="/superadmin-dashboard"
-  element={
-    user && user.role === "super-admin" ? (
-      <SARoutes user={user} setUser={setUser} />
-    ) : (
-      <Navigate to="/" replace />
-    )
-  }>
-
-{/* Nested routes */}
+          path="/superadmin-dashboard"
+          element={user?.role === "super-admin" ? <SARoutes user={user} setUser={setUser} /> : <Navigate to="/" replace />}
+        >
           <Route index element={<SuperAdminDashboard />} />
           <Route path="super-admins" element={<SuperAdminAccounts />} />
           <Route path="admins" element={<AdminsAccounts />} />
           <Route path="scholars" element={<ScholarsAccounts />} />
-          <Route path="rules" element={<RulesPage />} />
+          <Route path="stewardship-tasks" element={<SAstewardshipTasks />} />
+          <Route path="validation-tasks" element={<SAvalidationTasks />} />
+          <Route path="rules" element={<SuperAdminRulesPage />} />
           <Route path="activity-logs" element={<ActivityLogsPage />} />
         </Route>
+
+        {/* Catch-all */}
+        <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </Router>
   );

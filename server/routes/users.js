@@ -105,67 +105,120 @@ router.get("/super-admin-accounts", protect, hasRole("admin", "super-admin"), as
 
 router.get("/admin-accounts", protect, hasRole("super-admin"), async (req, res) => {
   try {
-    let query = `
-      SELECT u.id, u.name, u.email, u.created_at, r.name as role
+    const result = await pool.query(`
+      SELECT 
+        u.id, 
+        u.name, 
+        u.email, 
+        r.name AS role_name,
+        ar.coordinator_placement,
+        ar.description AS placement_description,
+        u.created_at
       FROM users u
-      LEFT JOIN roles r ON u.role_id = r.id
-      WHERE u.role_id = 2
-    `;
+      JOIN roles r ON u.role_id = r.id
+      JOIN admin_profiles ap ON u.id = ap.user_id
+      JOIN admins_role ar ON ap.placement_id = ar.placement_id
+      WHERE r.name = 'admin' OR r.name = 'super-admin'
+      ORDER BY u.created_at DESC
+    `);
 
-    query += " ORDER BY u.created_at DESC";
-
-    const users = await pool.query(query);
-    res.json(users.rows);
+    res.status(200).json(result.rows);
   } catch (error) {
     console.error(error);
-    res.status(500).json({ message: "Server error" });
+    res.status(500).json({ message: "Server error fetching admins" });
+  }
+});
+
+// GET all available coordinator placements
+router.get("/admin-placements", protect, async (req, res) => {
+  try {
+    const result = await pool.query(
+      "SELECT placement_id, coordinator_placement FROM admins_role ORDER BY coordinator_placement ASC"
+    );
+    
+    // Return the rows directly so the frontend can map through them
+    res.status(200).json(result.rows);
+  } catch (error) {
+    console.error("Error fetching placements:", error);
+    res.status(500).json({ message: "Server error fetching placement areas" });
   }
 });
 
 // Create admin account - Only super-admin can do this
 router.post("/create-admin", protect, hasRole("super-admin"), async (req, res) => {
-  try {
-    const { name, email, password, role } = req.body;
+  const client = await pool.connect();
 
-    // 1. Validation
-    if (!name || !email || !password || !role) {
-      return res.status(400).json({ message: "Please provide all required fields" });
+  try {
+    // Now accepting 'coordinator_placement' name or 'placement_id'
+    const { name, email, password, role, coordinator_placement } = req.body;
+
+    if (!name || !email || !password || !role || !coordinator_placement) {
+      return res.status(400).json({ message: "Please provide all required fields." });
     }
 
-    // 2. Map the role string to the ID in your DB
-    // Ensure 'super-admin' exists in your 'roles' table!
-    const roleQuery = await pool.query("SELECT id FROM roles WHERE name = $1", [role]);
-    
+    await client.query('BEGIN');
+
+    // 1. Get the placement_id from the string name provided
+    const placementQuery = await client.query(
+      "SELECT placement_id FROM admins_role WHERE coordinator_placement = $1",
+      [coordinator_placement]
+    );
+
+    if (placementQuery.rows.length === 0) {
+      throw new Error("INVALID_PLACEMENT");
+    }
+    const placement_id = placementQuery.rows[0].placement_id;
+
+    // 2. Map Role
+    const roleQuery = await client.query("SELECT id FROM roles WHERE name = $1", [role]);
     if (roleQuery.rows.length === 0) {
-      return res.status(400).json({ message: "Invalid Role" });
+      throw new Error("INVALID_ROLE");
     }
     const role_id = roleQuery.rows[0].id;
 
     // 3. Hash Password
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    // 4. Insert User (Using all 4 variables)
-    const newUser = await pool.query(
+    // 4. Insert into users
+    const userResult = await client.query(
       `INSERT INTO users (name, email, password, role_id) 
-       VALUES ($1, $2, $3, $4) 
-       RETURNING id, name, email`,
+       VALUES ($1, $2, $3, $4) RETURNING id, name, email`,
       [name, email, hashedPassword, role_id]
     );
+    const newUserId = userResult.rows[0].id;
+
+    // 5. Insert into admin_profiles
+    await client.query(
+      `INSERT INTO admin_profiles (user_id, placement_id) VALUES ($1, $2)`,
+      [newUserId, placement_id]
+    );
+
+    await client.query('COMMIT');
 
     res.status(201).json({
-      message: "Account created successfully",
-      user: newUser.rows[0]
+      message: "Admin created successfully",
+      user: {
+        ...userResult.rows[0],
+        coordinator_placement // Echo back the placement name
+      }
     });
 
   } catch (error) {
-    if (error.code === '23505') { // Postgres unique violation code
-      return res.status(400).json({ message: "Email already exists" });
+    await client.query('ROLLBACK');
+    
+    if (error.message === "INVALID_PLACEMENT") {
+      return res.status(400).json({ message: "The specified coordinator placement does not exist." });
     }
+    if (error.message === "INVALID_ROLE") {
+      return res.status(400).json({ message: "Invalid Role" });
+    }
+    // ... other error checks (23505, etc.)
     console.error(error);
     res.status(500).json({ message: "Server error" });
+  } finally {
+    client.release();
   }
 });
-
 
 // Get single user
 // User: can view own data
@@ -196,6 +249,49 @@ router.get("/:id", protect, canViewUser, async (req, res) => {
 // User: can update own data
 // Admin: can update user (role_id = 1) data
 // Super-admin: can update anyone's data
+router.put("/update-admin/:id", protect, hasRole("super-admin"), async (req, res) => {
+  const { id } = req.params;
+  const { name, email, coordinator_placement } = req.body;
+  const client = await pool.connect();
+
+  try {
+    await client.query('BEGIN');
+
+    // Update Users Table
+    await client.query(
+      "UPDATE users SET name = $1, email = $2, updated_at = CURRENT_TIMESTAMP WHERE id = $3",
+      [name, email, id]
+    );
+
+    // Find the ID for the string placement name
+    const placementRes = await client.query(
+      "SELECT placement_id FROM admins_role WHERE coordinator_placement = $1",
+      [coordinator_placement]
+    );
+
+    if (placementRes.rows.length === 0) {
+      throw new Error("Placement not found");
+    }
+
+    const p_id = placementRes.rows[0].placement_id;
+
+    // Update Admin Profile Table
+    await client.query(
+      "UPDATE admin_profiles SET placement_id = $1 WHERE user_id = $2",
+      [p_id, id]
+    );
+
+    await client.query('COMMIT');
+    res.json({ message: "Admin updated successfully" });
+  } catch (error) {
+    await client.query('ROLLBACK');
+    console.error(error);
+    res.status(500).json({ message: "Server error during update" });
+  } finally {
+    client.release();
+  }
+});
+
 router.put("/:id", protect, canManageUser, async (req, res) => {
   try {
     const { name, email } = req.body;

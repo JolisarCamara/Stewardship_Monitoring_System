@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import axios from "axios";
 import {
   Button,
@@ -8,6 +8,9 @@ import {
   Stack,
   Typography,
   IconButton,
+  MenuItem,
+  Select,
+  FormControl,
 } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
 
@@ -16,8 +19,35 @@ const CreateAdminButton = ({ onCreated }) => {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  
+  // New States for Placements
+  const [placements, setPlacements] = useState([]);
+  const [selectedPlacement, setSelectedPlacement] = useState("");
 
-  const handleClose = () => setOpen(false);
+  // Fetch placements from the backend
+  const fetchPlacements = async () => {
+    try {
+      const response = await axios.get("/api/users/admin-placements"); // Adjust path as needed
+      setPlacements(response.data);
+    } catch (error) {
+      console.error("Error fetching placements:", error);
+    }
+  };
+
+  useEffect(() => {
+    if (open) {
+      fetchPlacements();
+    }
+  }, [open]);
+
+  const handleClose = () => {
+    setOpen(false);
+    // Reset fields
+    setName("");
+    setEmail("");
+    setPassword("");
+    setSelectedPlacement("");
+  };
 
   const handleCreate = async () => {
     try {
@@ -26,32 +56,32 @@ const CreateAdminButton = ({ onCreated }) => {
         email,
         password,
         role: "admin",
+        // Sending the string name as your backend logic expects
+        coordinator_placement: selectedPlacement, 
       });
       onCreated();
       handleClose();
-      setName("");
-      setEmail("");
-      setPassword("");
     } catch (error) {
+      alert(error.response?.data?.message || "Error creating admin");
       console.error("Error creating admin:", error);
     }
   };
 
   return (
     <div className="flex flex-col sm:flex-row justify-center gap-4 mb-6">
-              <Button
-            variant="contained"
-            fullWidth
-            sx={{
-              maxWidth: 260,
-              bgcolor: "#C9A227",
-              borderRadius: "8px",
-              "&:hover": { bgcolor: "#B8960F" },
-            }}
-            onClick={() => setOpen(true)}
-          >
-            + Create Admin Account
-          </Button>
+      <Button
+        variant="contained"
+        fullWidth
+        sx={{
+          maxWidth: 260,
+          bgcolor: "#C9A227",
+          borderRadius: "8px",
+          "&:hover": { bgcolor: "#B8960F" },
+        }}
+        onClick={() => setOpen(true)}
+      >
+        + Create Admin Account
+      </Button>
 
       <Dialog
         open={open}
@@ -60,8 +90,8 @@ const CreateAdminButton = ({ onCreated }) => {
         fullWidth
         PaperProps={{
           sx: {
-            borderRadius: "2.5rem", // Very rounded corners
-            border: "4px solid #2D3E50", // The thick navy border
+            borderRadius: "2.5rem",
+            border: "4px solid #2D3E50",
             padding: "2rem",
             overflow: "hidden",
           },
@@ -69,13 +99,12 @@ const CreateAdminButton = ({ onCreated }) => {
       >
         <DialogContent>
           <Stack spacing={3} alignItems="center">
-            {/* Logo */}
             <img src="/logo.png" alt="Logo" className="w-50 h-40" />
             <IconButton
-            onClick={handleClose}
-            sx={{ position: "absolute", right: 16, top: 16 }}  
-          >
-            <CloseIcon/>
+              onClick={handleClose}
+              sx={{ position: "absolute", right: 16, top: 16 }}
+            >
+              <CloseIcon />
             </IconButton>
 
             <div style={{ textAlign: "center" }}>
@@ -87,7 +116,6 @@ const CreateAdminButton = ({ onCreated }) => {
               </Typography>
             </div>
 
-            {/* Inputs styled to match the image */}
             <Stack spacing={2} width="100%" mt={2}>
               <TextField
                 placeholder="Name"
@@ -103,7 +131,7 @@ const CreateAdminButton = ({ onCreated }) => {
                 onChange={(e) => setEmail(e.target.value)}
                 variant="standard"
                 InputProps={{ disableUnderline: true }}
-              sx={inputStyle}
+                sx={inputStyle}
               />
               <TextField
                 placeholder="Password"
@@ -114,9 +142,29 @@ const CreateAdminButton = ({ onCreated }) => {
                 InputProps={{ disableUnderline: true }}
                 sx={inputStyle}
               />
+
+              {/* Placement Selector */}
+              <FormControl fullWidth sx={inputStyle}>
+                <Select
+                  value={selectedPlacement}
+                  onChange={(e) => setSelectedPlacement(e.target.value)}
+                  displayEmpty
+                  variant="standard"
+                  disableUnderline
+                  sx={{ fontSize: "0.95rem" }}
+                >
+                  <MenuItem value="" disabled>
+                    <span style={{ color: "#aaa" }}>Select Coordinator Placement</span>
+                  </MenuItem>
+                  {placements.map((p) => (
+                    <MenuItem key={p.placement_id} value={p.coordinator_placement}>
+                      {p.coordinator_placement}
+                    </MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
             </Stack>
 
-            {/* Confirm Button */}
             <Button
               variant="contained"
               fullWidth
@@ -132,6 +180,7 @@ const CreateAdminButton = ({ onCreated }) => {
                 "&:hover": { bgcolor: "#1e2a36" },
               }}
               onClick={handleCreate}
+              disabled={!name || !email || !password || !selectedPlacement}
             >
               CONFIRM
             </Button>
@@ -142,17 +191,15 @@ const CreateAdminButton = ({ onCreated }) => {
   );
 };
 
-// Custom style for the fields to get that light-gray "borderless" look
 const inputStyle = {
   bgcolor: "#F5F5F5",
   borderRadius: "12px",
   px: 2,
-  py: 1,
+  py: 0.5, // Reduced padding slightly to accommodate Select height
   "& .MuiInputBase-input": {
     fontSize: "0.95rem",
+    py: 1.5 // Standardizing height
   }
 };
 
 export default CreateAdminButton;
-
-

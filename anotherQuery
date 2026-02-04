@@ -26,3 +26,19 @@ CREATE TABLE admin_profiles (
   placement_id INT REFERENCES admins_role(placement_id)
 );
 
+
+--JOINS
+SELECT 
+        u.id, 
+        u.name, 
+        u.email, 
+        r.name AS role_name,
+        ar.coordinator_placement,
+        ar.description AS placement_description,
+        u.created_at
+      FROM users u
+      JOIN roles r ON u.role_id = r.id
+      JOIN admin_profiles ap ON u.id = ap.user_id
+      JOIN admins_role ar ON ap.placement_id = ar.placement_id
+      WHERE r.name = 'admin' OR r.name = 'super-admin'
+      ORDER BY u.created_at DESC

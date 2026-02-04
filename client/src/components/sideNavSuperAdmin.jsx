@@ -9,6 +9,8 @@ import PeopleAltIcon from '@mui/icons-material/PeopleAlt';
 import SchoolIcon from '@mui/icons-material/School';
 import GavelIcon from '@mui/icons-material/Gavel';
 import HistoryIcon from '@mui/icons-material/History';
+import AssignmentTurnedInIcon from '@mui/icons-material/AssignmentTurnedIn';
+import FactCheckIcon from '@mui/icons-material/FactCheck';
 
 const SideBar_superAdmin = ({ children, setUser }) => {
   const navItems = [
@@ -16,6 +18,8 @@ const SideBar_superAdmin = ({ children, setUser }) => {
     { label: "SUPER ADMIN", path: "/superadmin-dashboard/super-admins", icon: <AdminPanelSettingsIcon sx={{ fontSize: 20 }} /> },
     { label: "ADMINS", path: "/superadmin-dashboard/admins", icon: <PeopleAltIcon sx={{ fontSize: 20 }} /> },
     { label: "SCHOLARS", path: "/superadmin-dashboard/scholars", icon: <SchoolIcon sx={{ fontSize: 20 }} /> },
+    { label: "STEWARDSHIP TASK", path: "/superadmin-dashboard/stewardship-tasks", icon: <AssignmentTurnedInIcon sx={{ fontSize: 20 }} /> },
+    { label: "VALIDATION TASK", path: "/superadmin-dashboard/validation-tasks", icon: <FactCheckIcon sx={{ fontSize: 20 }} /> },
     { label: "RULES", path: "/superadmin-dashboard/rules", icon: <GavelIcon sx={{ fontSize: 20 }} /> },
     { label: "ACTIVITY LOGS", path: "/superadmin-dashboard/activity-logs", icon: <HistoryIcon sx={{ fontSize: 20 }} /> },
   ];
@@ -28,7 +32,7 @@ const SideBar_superAdmin = ({ children, setUser }) => {
         logoutComponent={<LogoutButton setUser={setUser} />} 
       />
 
-      {/* DESKTOP VERSION (Increased width slightly for icons) */}
+      {/* DESKTOP VERSION */}
       <aside className="hidden md:flex w-[240px] h-screen bg-[#24324D] fixed left-0 top-0 flex flex-col font-inter">
         <div className="p-6">
           <div className="w-full h-[100px] flex items-center justify-center">
@@ -47,7 +51,6 @@ const SideBar_superAdmin = ({ children, setUser }) => {
                 ${isActive ? "bg-[#3d4a66]" : "hover:bg-[#3d4a66]/50"}`
               }
             >
-              {/* Icon Container */}
               <span className="flex items-center justify-center opacity-80">
                 {item.icon}
               </span>

@@ -18,6 +18,7 @@ import IconButton from "@mui/material/IconButton";
 import Stack from "@mui/material/Stack";
 import CloseIcon from "@mui/icons-material/Close";
 import Typography from "@mui/material/Typography";
+import { MenuItem, Select, FormControl } from "@mui/material";
 
 import useMediaQuery from "@mui/material/useMediaQuery";
 import { useTheme } from "@mui/material/styles";
@@ -30,8 +31,10 @@ const AdminAccounts = () => {
   const [openDelete, setOpenDelete] = useState(false);
   const [selectedAdmin, setSelectedAdmin] = useState(null);
 
+  const [editPlacement, setEditPlacement] = useState("");
   const [editName, setEditName] = useState("");
   const [editEmail, setEditEmail] = useState("");
+  const [placements, setPlacements] = useState([]);
 
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
@@ -44,13 +47,22 @@ const AdminAccounts = () => {
   useEffect(() => {
     fetchAdmins();
   }, []);
+  
+  useEffect(() => {
+  if (openEdit) {
+    axios.get("/api/users/admin-placements")
+      .then(res => setPlacements(res.data))
+      .catch(err => console.error(err));
+  }
+}, [openEdit]);
 
   const handleOpenEdit = (admin) => {
-    setSelectedAdmin(admin);
-    setEditName(admin.name);
-    setEditEmail(admin.email);
-    setOpenEdit(true);
-  };
+  setSelectedAdmin(admin);
+  setEditName(admin.name);
+  setEditEmail(admin.email);
+  setEditPlacement(admin.coordinator_placement || ""); 
+  setOpenEdit(true);
+};
 
   const handleOpenDelete = (admin) => {
     setSelectedAdmin(admin);
@@ -63,14 +75,20 @@ const AdminAccounts = () => {
     setSelectedAdmin(null);
   };
 
-  const handleUpdate = async () => {
-    await axios.put(`/api/users/${selectedAdmin.id}`, {
+ const handleUpdate = async () => {
+  try {
+    await axios.put(`/api/users/update-admin/${selectedAdmin.id}`, {
       name: editName,
       email: editEmail,
+      coordinator_placement: editPlacement, // You were missing this!
     });
     fetchAdmins();
     handleCloseDialogs();
-  };
+  } catch (error) {
+    console.error("Error updating admin:", error);
+    alert("Failed to update admin.");
+  }
+};
 
   const handleConfirmDelete = async () => {
     await axios.delete(`/api/users/${selectedAdmin.id}`);
@@ -191,6 +209,25 @@ const AdminAccounts = () => {
           InputProps={{ disableUnderline: true }}
           sx={inputStyle}
         />
+          <FormControl fullWidth sx={inputStyle}>
+            <Select
+              value={editPlacement}
+              onChange={(e) => setEditPlacement(e.target.value)}
+              displayEmpty
+              variant="standard"
+              disableUnderline
+              sx={{ fontSize: "0.95rem" }}
+            >
+              <MenuItem value="" disabled>
+                <span style={{ color: "#aaa" }}>Select Coordinator Placement</span>
+              </MenuItem>
+              {placements.map((p) => (
+                <MenuItem key={p.placement_id} value={p.coordinator_placement}>
+                  {p.coordinator_placement}
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
       </Stack>
 
       {/* Navy Confirm Button - Centered and 60% width */}
