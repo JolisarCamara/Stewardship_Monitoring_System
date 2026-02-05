@@ -3,6 +3,11 @@ import axios from "axios";
 import { BrowserRouter as Router, Routes, Route, Navigate} from "react-router-dom";
 
 import ScholarDashboard from "./pages/Scholar/scholarDashboard";
+import BiometricTimeInOut from "./pages/Scholar/biometricTimeInOut";
+import ScholarStewardshipTask from "./pages/Scholar/scholarStewardshipTask";
+import ScholarRules from "./pages/Scholar/scholarRules";
+import ScholarActivityLogs from "./pages/Scholar/activityLogs";
+import ScholarRoutes from "./pages/Scholar/scholarRoutes";
 
 //Admin
 import AdminDashboard from "./pages/Admin/adminDashboard";
@@ -72,11 +77,17 @@ function App() {
           }
         />
 
-        {/* Scholar Route */}
+        {/* Scholar Route Group - FIXED NESTING */}
         <Route
           path="/scholar-dashboard"
-          element={user?.role === "user" ? <ScholarDashboard user={user} setUser={setUser} /> : <Navigate to="/" replace />}
-        />
+          element={user?.role === "user" ? <ScholarRoutes user={user} setUser={setUser} /> : <Navigate to="/" replace />}
+        >
+          <Route index element={<ScholarDashboard />} />
+          <Route path="stewardship-tasks" element={<ScholarStewardshipTask/>} />
+          <Route path="biometrics-time-in-out" element={<BiometricTimeInOut/>} />
+          <Route path="rules" element={<ScholarRules />} />
+          <Route path="activity-logs" element={<ScholarActivityLogs />} />
+        </Route>
 
         {/* Admin Dashboard Group */}
         <Route

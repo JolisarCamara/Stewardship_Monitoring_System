@@ -4,7 +4,9 @@ import LogoutButton from "../../components/LogoutButton";
 const AdminDashboard = ({  setUser}) =>{
     return (
     <div>
-     <div>Admin Dashboard</div>
+     <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-[#3D5A80] mb-4">
+        Admin Dashboard
+      </h1>
     </div>
     );
 }

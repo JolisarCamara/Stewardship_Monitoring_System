@@ -26,8 +26,33 @@ CREATE TABLE admin_profiles (
   placement_id INT REFERENCES admins_role(placement_id)
 );
 
+--Insert placement
+INSERT INTO admins_role (coordinator_placement, description) VALUES
+('Student Affairs Office', 'Manages student organizations, discipline, and extracurricular services.'),
+('Library', 'Manages academic resources, book collections, and student research assistance.'),
+('Computer Laboratory', 'Maintains hardware, software, and network infrastructure; ensures the cleanliness of the lab.'),
+('Registrar', 'Handles student enrollment, academic records, and transcript processing.'),
+('Admin Office', 'Manages general school operations, faculty coordination, and executive tasks.'),
+('Elementary/Highschool', 'Coordinates department-specific curriculum and basic education faculty.'),
+('Clinic', 'Provides primary healthcare services and emergency medical assistance to students.'),
+('Accounting Office', 'Manages payroll and the institution financial records.');
+
+CREATE TABLE stewardship_logs (
+  log_id SERIAL PRIMARY KEY,
+  scholar_id INT NOT NULL REFERENCES scholar_profiles(user_id) ON DELETE CASCADE,
+  log_date DATE NOT NULL DEFAULT CURRENT_DATE,
+  time_in TIME NOT NULL,
+  time_out TIME,
+  total_hours DECIMAL(5, 2), 
+  specific_accomplishment TEXT,
+  -- Foreign key to admin_profiles, ensuring only admins can validate
+  validated_by_admin_id INT REFERENCES admin_profiles(user_id),
+  validation_status VARCHAR(20) DEFAULT 'Pending' -- 'Pending', 'Validated', 'Rejected'
+);
 
 --JOINS
+
+--admin accounts with placement
 SELECT 
         u.id, 
         u.name, 
@@ -42,3 +67,24 @@ SELECT
       JOIN admins_role ar ON ap.placement_id = ar.placement_id
       WHERE r.name = 'admin' OR r.name = 'super-admin'
       ORDER BY u.created_at DESC
+
+--stewardship logs
+SELECT 
+    u_scholar.name AS student_name,
+    ar.coordinator_placement AS student_placement,
+    sp.course AS program,
+    sp.year_level,
+    sl.log_date AS date,
+    sl.time_in,
+    sl.time_out,
+    sl.total_hours,
+    sl.specific_accomplishment,
+    sl.validation_status,
+    u_admin.name AS validator_name
+FROM stewardship_logs sl
+JOIN scholar_profiles sp ON sl.scholar_id = sp.user_id
+JOIN users u_scholar ON sp.user_id = u_scholar.id
+JOIN admins_role ar ON sp.placement_id = ar.placement_id
+LEFT JOIN admin_profiles ap ON sl.validated_by_admin_id = ap.user_id
+LEFT JOIN users u_admin ON ap.user_id = u_admin.id
+ORDER BY sl.log_date DESC;

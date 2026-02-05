@@ -64,7 +64,6 @@ router.get("/stats", protect, hasRole("super-admin"), async (req, res) => {
 });
 
 
-
 router.get("/scholar-accounts", protect, hasRole("admin", "super-admin"), async (req, res) => {
   try {
     let query = `
@@ -84,7 +83,7 @@ router.get("/scholar-accounts", protect, hasRole("admin", "super-admin"), async 
   }
 });
 
-router.get("/super-admin-accounts", protect, hasRole("admin", "super-admin"), async (req, res) => {
+router.get("/super-admin-accounts", protect, hasRole("super-admin"), async (req, res) => {
   try {
     let query = `
       SELECT u.id, u.name, u.email, u.created_at, r.name as role
