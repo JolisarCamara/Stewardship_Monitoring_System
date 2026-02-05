@@ -7,10 +7,12 @@ import DashboardIcon from '@mui/icons-material/Dashboard';
 import GavelIcon from '@mui/icons-material/Gavel';
 import AssignmentTurnedInIcon from '@mui/icons-material/AssignmentTurnedIn';
 import FactCheckIcon from '@mui/icons-material/FactCheck';
+import SchoolIcon from '@mui/icons-material/School';
 
 const SideBar_Admin = ({ children, setUser }) => {
   const navItems = [
     { label: "DASHBOARD", path: "/admin-dashboard", icon: <DashboardIcon sx={{ fontSize: 20 }} /> },
+    { label: "SCHOLARS", path: "/admin-dashboard/scholars", icon: <SchoolIcon sx={{ fontSize: 20 }} /> },
     { label: "STEWARDSHIP TASK", path: "/admin-dashboard/stewardship-tasks", icon: <AssignmentTurnedInIcon sx={{ fontSize: 20 }} /> },
     { label: "VALIDATION TASK", path: "/admin-dashboard/validation-tasks", icon: <FactCheckIcon sx={{ fontSize: 20 }} /> },
     { label: "RULES", path: "/admin-dashboard/rules", icon: <GavelIcon sx={{ fontSize: 20 }} /> },

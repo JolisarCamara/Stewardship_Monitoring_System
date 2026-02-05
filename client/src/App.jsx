@@ -10,6 +10,7 @@ import AdminRoutes from "./pages/Admin/AdminRoutes";
 import AdminRulesPage from "./pages/Admin/rules";
 import AdminStewardshipTask from "./pages/Admin/stewardshipTask";
 import AdminValidationTask from "./pages/Admin/taskValidation";
+import AdminScholarAccounts from "./pages/Admin/scholarAccounts";
 
 
 //Super Admin
@@ -83,6 +84,7 @@ function App() {
           element={user?.role === "admin" ? <AdminRoutes user={user} setUser={setUser} /> : <Navigate to="/" replace />}
         >
           <Route index element={<AdminDashboard />} />
+          <Route path="scholars" element={<AdminScholarAccounts/>} />
           <Route path="stewardship-tasks" element={<AdminStewardshipTask />} />
           <Route path="validation-tasks" element={<AdminValidationTask />} />
           <Route path="rules" element={<AdminRulesPage />} />

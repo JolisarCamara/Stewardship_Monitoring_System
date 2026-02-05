@@ -41,13 +41,3 @@ CREATE TRIGGER update_users_updated_at
   BEFORE UPDATE ON users 
   FOR EACH ROW 
   EXECUTE FUNCTION update_updated_at_column();
-
--- Insert a default super-admin user (optional - for initial setup)
--- Password: 'admin123' (CHANGE THIS IMMEDIATELY!)
-INSERT INTO users (name, email, password, role_id) 
-VALUES (
-  'Super Admin', 
-  'superadmin@example.com', 
-  '$2a$10$rZ5YhXQVEKKKKHW8Kq0eYeVjBxJXqZ8QYZQYqKQQKQKQKQKQKQKQK', 
-  3
-);
